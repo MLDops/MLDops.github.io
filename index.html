@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>New Hire Onboarding | MLDataOps</title>
+<style>
+  /* ===== AWS-inspired design tokens ===== */
+  :root {
+    --aws-navy: #232f3e;        /* squid ink - header/nav */
+    --aws-navy-2: #161e2d;      /* darker navy */
+    --aws-orange: #ff9900;      /* signature orange */
+    --aws-orange-dark: #ec7211;
+    --aws-blue: #0972d3;        /* link / action blue */
+    --aws-blue-dark: #033160;
+    --aws-bg: #f2f3f3;          /* console gray background */
+    --aws-surface: #ffffff;
+    --aws-border: #d5dbdb;
+    --aws-text: #16191f;
+    --aws-text-muted: #5f6b7a;
+    --aws-chip-bg: #e9f2fb;
+    --radius: 8px;
+    --shadow: 0 1px 4px rgba(0,28,36,.12), 0 4px 12px rgba(0,28,36,.06);
+    --font: "Amazon Ember","Helvetica Neue",Arial,sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--aws-bg);
+    color: var(--aws-text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== Top navigation bar (AWS console style) ===== */
+  .topbar {
+    background: var(--aws-navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 20px;
+    height: 48px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  .topbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: .5px;
+  }
+  .topbar .logo .a { color: #fff; }
+  .topbar .logo .smile { color: var(--aws-orange); display: block; }
+  .topbar .divider {
+    width: 1px; height: 24px; background: #3a4553;
+  }
+  .topbar .service-name {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .topbar .spacer { flex: 1; }
+  .topbar .top-right {
+    font-size: 13px;
+    color: #d5dbdb;
+  }
+  @media (max-width: 480px) {
+    .topbar .top-right { display: none; }
+  }
+
+  /* ===== Hero / header banner ===== */
+  .hero {
+    background: linear-gradient(135deg, var(--aws-navy) 0%, var(--aws-blue-dark) 100%);
+    color: #fff;
+    padding: 40px 24px 48px;
+    border-bottom: 4px solid var(--aws-orange);
+  }
+  .hero-inner { max-width: 1200px; margin: 0 auto; }
+  .hero h1 { font-size: 30px; font-weight: 700; margin-bottom: 8px; }
+  .hero p { color: #cfd7df; font-size: 15px; max-width: 720px; }
+  .hero .badge {
+    display: inline-block;
+    background: rgba(255,153,0,.15);
+    color: var(--aws-orange);
+    border: 1px solid var(--aws-orange);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    letter-spacing: .3px;
+  }
+
+  /* ===== Layout ===== */
+  .container { max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px; }
+
+  /* ===== Sticky search + controls ===== */
+  .controls-wrap {
+    position: sticky;
+    top: 48px;                 /* sits right under the topbar */
+    z-index: 150;
+    background: var(--aws-bg);
+    padding: 16px 0 12px;
+    margin-bottom: 8px;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    border: 1px solid var(--aws-border);
+    border-radius: var(--radius);
+    font-size: 15px;
+    background: var(--aws-surface);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .search-box input:focus {
+    border-color: var(--aws-blue);
+    box-shadow: 0 0 0 2px rgba(9,114,211,.25);
+  }
+  .search-box .icon {
+    position: absolute;
+    left: 13px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--aws-text-muted);
+    display: inline-flex;
+    align-items: center;
+    pointer-events: none;
+  }
+  .search-box kbd {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: var(--aws-bg);
+    border: 1px solid var(--aws-border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: var(--font);
+    color: var(--aws-text-muted);
+    padding: 2px 7px;
+    pointer-events: none;
+  }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .filter-btn {
+    border: 1px solid var(--aws-border);
+    background: var(--aws-surface);
+    color: var(--aws-text);
+    padding: 9px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    min-height: 40px;          /* larger tap target */
+  }
+  .filter-btn:hover { border-color: var(--aws-blue); color: var(--aws-blue); }
+  .filter-btn:focus-visible {
+    outline: 2px solid var(--aws-blue);
+    outline-offset: 2px;
+  }
+  .filter-btn.active {
+    background: var(--aws-navy);
+    color: #fff;
+    border-color: var(--aws-navy);
+  }
+
+  .result-count {
+    font-size: 13px;
+    color: var(--aws-text-muted);
+    margin-bottom: 16px;
+  }
+
+  /* ===== Category sections ===== */
+  .cat-section { margin-bottom: 10px; }
+  .cat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--aws-border);
+    padding: 14px 4px;
+    cursor: pointer;
+    text-align: left;
+    color: var(--aws-text);
+    font-family: var(--font);
+  }
+  .cat-header:focus-visible {
+    outline: 2px solid var(--aws-blue);
+    outline-offset: 2px;
+  }
+  .cat-header .chevron {
+    color: var(--aws-text-muted);
+    transition: transform .2s ease;
+    flex-shrink: 0;
+  }
+  .cat-header[aria-expanded="false"] .chevron { transform: rotate(-90deg); }
+  .cat-header .cat-icon {
+    width: 32px; height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--aws-chip-bg);
+    color: var(--aws-blue-dark);
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .cat-header .cat-title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .cat-header .cat-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--aws-text-muted);
+    background: var(--aws-surface);
+    border: 1px solid var(--aws-border);
+    border-radius: 10px;
+    padding: 1px 9px;
+    margin-left: auto;
+  }
+
+  .cat-body {
+    overflow: hidden;
+    transition: max-height .28s ease;
+  }
+
+  /* ===== Card grid ===== */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 18px;
+    padding: 18px 2px 6px;
+  }
+  .card {
+    background: var(--aws-surface);
+    border: 1px solid var(--aws-border);
+    border-radius: var(--radius);
+    padding: 16px 16px 14px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    transition: transform .12s, box-shadow .12s;
+    position: relative;
+    border-top: 3px solid var(--aws-orange);
+    /* entrance animation */
+    opacity: 0;
+    transform: translateY(10px);
+    animation: cardIn .4s ease forwards;
+  }
+  @keyframes cardIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card { animation: none; opacity: 1; transform: none; }
+    html { scroll-behavior: auto; }
+    .cat-body { transition: none; }
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,28,36,.18);
+  }
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .card .tool-icon {
+    width: 42px; height: 42px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--aws-chip-bg);
+    color: var(--aws-blue-dark);
+    border-radius: 10px;
+  }
+  .card h3 {
+    font-size: 16.5px;
+    color: var(--aws-text);
+    padding-top: 3px;
+  }
+  .card p {
+    font-size: 13.5px;
+    color: var(--aws-text-muted);
+    flex: 1;
+    margin-bottom: 14px;
+  }
+  .card mark {
+    background: rgba(255,153,0,.35);
+    color: inherit;
+    padding: 0 1px;
+    border-radius: 2px;
+  }
+  .card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--aws-orange);
+    color: var(--aws-navy);
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: none;
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    transition: background .15s;
+    min-height: 40px;
+  }
+  .card-action:hover { background: var(--aws-orange-dark); color: #fff; }
+  .card-action:focus-visible {
+    outline: 2px solid var(--aws-blue);
+    outline-offset: 2px;
+  }
+  .card-action.disabled {
+    background: #eaeded;
+    color: var(--aws-text-muted);
+    cursor: default;
+    pointer-events: none;
+  }
+  .btn-icon { display: inline-block; vertical-align: middle; }
+
+  /* copy button */
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; height: 40px;
+    border: 1px solid var(--aws-border);
+    background: var(--aws-surface);
+    color: var(--aws-text-muted);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all .15s;
+    position: relative;
+  }
+  .copy-btn:hover { border-color: var(--aws-blue); color: var(--aws-blue); }
+  .copy-btn:focus-visible {
+    outline: 2px solid var(--aws-blue);
+    outline-offset: 2px;
+  }
+  .copy-btn.copied { border-color: #037f51; color: #037f51; }
+  .copy-btn .tip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--aws-navy);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s;
+  }
+  .copy-btn.copied .tip { opacity: 1; }
+
+  /* ===== Empty / no-results state ===== */
+  .no-results {
+    text-align: center;
+    padding: 56px 20px;
+    color: var(--aws-text-muted);
+    display: none;
+  }
+  .no-results.show { display: block; animation: cardIn .3s ease forwards; }
+  .no-results svg { color: var(--aws-border); margin-bottom: 12px; }
+  .no-results h3 { color: var(--aws-text); margin-bottom: 6px; }
+  .no-results button {
+    margin-top: 16px;
+    background: var(--aws-navy);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .no-results button:hover { background: var(--aws-navy-2); }
+
+  /* ===== Footer ===== */
+  footer {
+    background: var(--aws-navy);
+    color: #b7c0cd;
+    text-align: center;
+    padding: 20px;
+    font-size: 12.5px;
+  }
+  footer strong { color: #fff; }
+
+  /* screen-reader only */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* ===== Responsive refinements ===== */
+  @media (max-width: 600px) {
+    .hero { padding: 28px 20px 34px; }
+    .hero h1 { font-size: 24px; }
+    .container { padding: 16px 16px 48px; }
+    .grid { grid-template-columns: 1fr; gap: 14px; }
+    .search-box kbd { display: none; }
+    .controls-wrap { top: 48px; }
+    .filters { width: 100%; }
+    .filter-btn { flex: 1 1 auto; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top nav -->
+  <div class="topbar">
+    <div class="logo">
+      <span class="a">aws</span>
+      <svg class="smile" viewBox="0 0 40 16" width="26" height="11" aria-hidden="true">
+        <path d="M2 4 C10 12, 30 12, 38 4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+        <path d="M34 2 L38 4 L34 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </div>
+    <div class="divider"></div>
+    <div class="service-name">New Hire Onboarding</div>
+    <div class="spacer"></div>
+    <div class="top-right">MLDataOps &middot; Internal Use</div>
+  </div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="badge">AWS &middot; MLDataOps Team</span>
+      <h1>Welcome aboard</h1>
+      <p>Your one-stop quick-links hub for everything you need in your first days. Search or filter the internal tools and portals used day to day by the ML Data Operations team.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Sticky controls -->
+    <div class="controls-wrap">
+      <div class="controls">
+        <div class="search-box">
+          <span class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input type="text" id="searchInput" placeholder="Search tools, links or descriptions..." aria-label="Search tools" autocomplete="off" />
+          <kbd>/</kbd>
+        </div>
+        <div class="filters" id="filters" role="group" aria-label="Filter by category"></div>
+      </div>
+    </div>
+
+    <div class="result-count" id="resultCount" aria-live="polite"></div>
+
+    <!-- Category sections render here -->
+    <div id="sections"></div>
+
+    <div class="no-results" id="noResults">
+      <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <h3>No matching tools found</h3>
+      <p>Try a different search term or clear the filter.</p>
+      <button type="button" id="clearBtn">Clear search &amp; filters</button>
+    </div>
+  </main>
+
+  <footer>
+    <strong>New Hire Onboarding Portal</strong> &mdash; MLDataOps / AWS Rekognition Data Operations<br />
+    Internal use only &middot; All links require Amazon corporate network / VPN access.
+  </footer>
+
+<script>
+  /* ===== Icon library (inline SVG paths) ===== */
+  const ICONS = {
+    wiki:      '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a2 2 0 0 1 2 2v14a1 1 0 0 0-1-1H4z"/><path d="M4 19V4"/><line x1="8" y1="8" x2="15" y2="8"/><line x1="8" y1="11" x2="15" y2="11"/></svg>',
+    clock:     '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>',
+    calendar:  '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>',
+    timesheet: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
+    drive:     '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15a4 4 0 0 0 4 4h11a3 3 0 0 0 .5-5.96A5 5 0 0 0 9 8.5 4 4 0 0 0 3 12z"/></svg>',
+    ticket:    '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4z"/><line x1="13" y1="6" x2="13" y2="16"/></svg>',
+    support:   '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><line x1="14.5" y1="9.5" x2="18" y2="6"/><line x1="6" y1="18" x2="9.5" y2="14.5"/><line x1="14.5" y1="14.5" x2="18" y2="18"/><line x1="6" y1="6" x2="9.5" y2="9.5"/></svg>',
+    transport: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11"/><path d="M4 11h16v6H4z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>',
+    mail:      '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
+    pay:       '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><line x1="6" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="18" y2="12"/></svg>',
+    lock:      '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+    key:       '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="4.5"/><path d="M11.2 11.2 20 20"/><line x1="17" y1="17" x2="19" y2="15"/><line x1="15" y1="15" x2="17" y2="13"/></svg>',
+    directory: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>',
+    news:      '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v14a2 2 0 0 0 2 2H5a1 1 0 0 1-1-1z"/><path d="M17 8h2a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2"/><line x1="7" y1="9" x2="14" y2="9"/><line x1="7" y1="13" x2="14" y2="13"/><line x1="7" y1="17" x2="11" y2="17"/></svg>',
+    aces:      '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><polyline points="9 12 11 14 15 10"/></svg>'
+  };
+
+  const OPEN_ICON = '<svg class="btn-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 L17 7"></path><path d="M8 7 h9 v9"></path></svg>';
+  const COPY_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>';
+  const CHECK_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 12 10 17 19 7"/></svg>';
+
+  /* Category -> header icon */
+  const CATEGORY_ICONS = {
+    "Team & Knowledge": ICONS.wiki,
+    "Time & Attendance": ICONS.clock,
+    "Files & Storage": ICONS.drive,
+    "IT & Support": ICONS.support,
+    "Transport": ICONS.transport,
+    "Pay & HR": ICONS.pay,
+    "Security & Access": ICONS.lock,
+    "Directory": ICONS.directory
+  };
+
+  /* ===== Data (sourced from New Hire Onboard sheet) =====
+     `keywords` power fuzzy/synonym matching. */
+  const TOOLS = [
+    { name: "Org Wiki", icon: "wiki", link: "https://w.amazon.com/bin/view/AWS-MLDataOps-Team", desc: "Get to know the MLDataOps team.", category: "Team & Knowledge", keywords: "wiki team org mldataops about" },
+    { name: "ACES Wiki", icon: "aces", link: "https://w.amazon.com/bin/view/AWSRekognition/DataOperations/ACES-Framework/", desc: "ACES framework reference wiki.", category: "Team & Knowledge", keywords: "aces framework rekognition wiki reference" },
+    { name: "atoz", icon: "news", link: "https://atoz.amazon.work/home", desc: "Amazon news, Phonetool and Knets.", category: "Team & Knowledge", keywords: "atoz a to z news phonetool knets home" },
+    { name: "Kronos Workforce Central", icon: "clock", link: "https://mytime-lite.aka.corp.amazon.com/", desc: "Punch in and punch out, record your timestamps.", category: "Time & Attendance", keywords: "kronos mytime punch attendance clock in out timestamp workforce" },
+    { name: "My Timeoff", icon: "calendar", link: "https://mytimeoff.corp.amazon.com/time_off", desc: "Apply for leaves.", category: "Time & Attendance", keywords: "timeoff time off leave vacation pto holiday absence apply" },
+    { name: "Timesheet", icon: "timesheet", link: "https://amazon.sharepoint.com/sites/AWS-MLDOps/Lists/Timesheet%202026%20v2/AllItems.aspx", desc: "Update daily work along with respective working-hour split ups.", category: "Time & Attendance", keywords: "timesheet daily entry hours log work sharepoint" },
+    { name: "Amazon Drive", icon: "drive", link: "https://drive.corp.amazon.com/", desc: "Personal Amazon drive to store work-related folders and keep backups.", category: "Files & Storage", keywords: "drive storage files folders backup cloud" },
+    { name: "TT (Trouble Ticket)", icon: "ticket", link: "https://tt.amazon.com/", desc: "Raise issue-related tickets.", category: "IT & Support", keywords: "tt trouble ticket issue raise sim report" },
+    { name: "IT Support", icon: "support", link: "https://it.amazon.com/", desc: "IT support for any hardware or software complaints or queries.", category: "IT & Support", keywords: "it support hardware software help laptop complaint query" },
+    { name: "ETS Login", icon: "transport", link: "https://amz3.moveinsync.com/optin/", desc: "Transport opt in or out.", category: "Transport", keywords: "ets moveinsync transport cab shuttle optin opt in out commute" },
+    { name: "Opting Cab Service", icon: "mail", link: "", desc: "Send an email to opt in to the cab service.", category: "Transport", keywords: "cab taxi transport opt in email service commute" },
+    { name: "AllDigi", icon: "pay", link: "https://smartpay.buzzily.com/AmazonSSO/Common/Home.aspx", desc: "View monthly payslips, reimbursements, resignation and more.", category: "Pay & HR", keywords: "alldigi payslip salary reimbursement resignation hr smartpay payroll" },
+    { name: "Password Change", icon: "lock", link: "https://password-v2.corp.amazon.com/", desc: "If you have forgotten or want to change your Amazon password.", category: "Security & Access", keywords: "password change reset forgot credentials login" },
+    { name: "Midway Portal", icon: "key", link: "https://midway-auth.amazon.com/", desc: "Password management for your security key.", category: "Security & Access", keywords: "midway auth security key pin yubikey authentication mfa" },
+    { name: "Phonetool", icon: "directory", link: "http://phonetool.amazon.com/", desc: "Find the user / employee directory.", category: "Directory", keywords: "phonetool directory employee people find profile contact" }
+  ];
+
+  /* Preserve category order as first-seen in TOOLS */
+  const CATEGORY_ORDER = [...new Set(TOOLS.map(t => t.category))];
+
+  const sectionsEl = document.getElementById("sections");
+  const searchInput = document.getElementById("searchInput");
+  const filtersEl = document.getElementById("filters");
+  const resultCount = document.getElementById("resultCount");
+  const noResults = document.getElementById("noResults");
+  const clearBtn = document.getElementById("clearBtn");
+
+  let activeCategory = "All";
+  const collapsed = new Set();   // track collapsed categories
+
+  /* ---------- helpers ---------- */
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+
+  /* Highlight matched substring (case-insensitive) within already-escaped text */
+  function highlight(text, q) {
+    const safe = escapeHtml(text);
+    if (!q) return safe;
+    const escQ = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return safe.replace(new RegExp("(" + escQ + ")", "gi"), "<mark>$1</mark>");
+  }
+
+  /* Levenshtein distance for typo tolerance */
+  function levenshtein(a, b) {
+    const m = a.length, n = b.length;
+    if (!m) return n;
+    if (!n) return m;
+    let prev = Array.from({ length: n + 1 }, (_, i) => i);
+    let curr = new Array(n + 1);
+    for (let i = 1; i <= m; i++) {
+      curr[0] = i;
+      for (let j = 1; j <= n; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
+      }
+      [prev, curr] = [curr, prev];
+    }
+    return prev[n];
+  }
+
+  /* Fuzzy: does the haystack of words fuzzily contain the query? */
+  function fuzzyMatch(query, haystack) {
+    if (!query) return true;
+    const hay = haystack.toLowerCase();
+    if (hay.includes(query)) return true;           // direct substring
+    // token-by-token fuzzy comparison
+    const words = hay.split(/[^a-z0-9]+/).filter(Boolean);
+    // allowed edit distance scales with query length
+    const tolerance = query.length <= 4 ? 1 : query.length <= 7 ? 2 : 3;
+    for (const w of words) {
+      if (w.includes(query)) return true;
+      if (Math.abs(w.length - query.length) <= tolerance && levenshtein(query, w) <= tolerance) return true;
+    }
+    return false;
+  }
+
+  function toolMatches(t, q) {
+    if (!q) return true;
+    const haystack = [t.name, t.desc, t.link, t.category, t.keywords || ""].join(" ");
+    // split query into terms, all must match (AND)
+    const terms = q.split(/\s+/).filter(Boolean);
+    return terms.every(term => fuzzyMatch(term, haystack));
+  }
+
+  /* ---------- build category filter buttons ---------- */
+  const categories = ["All", ...CATEGORY_ORDER];
+  categories.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "filter-btn" + (cat === "All" ? " active" : "");
+    btn.textContent = cat;
+    btn.setAttribute("aria-pressed", cat === "All" ? "true" : "false");
+    btn.addEventListener("click", () => {
+      activeCategory = cat;
+      document.querySelectorAll(".filter-btn").forEach(b => {
+        b.classList.remove("active");
+        b.setAttribute("aria-pressed", "false");
+      });
+      btn.classList.add("active");
+      btn.setAttribute("aria-pressed", "true");
+      render();
+    });
+    filtersEl.appendChild(btn);
+  });
+
+  /* ---------- card + section builders ---------- */
+  function buildCard(t, q, index) {
+    const hasLink = t.link && t.link.length > 0;
+    const toolIcon = ICONS[t.icon] || ICONS.wiki;
+
+    const action = hasLink
+      ? `<a class="card-action" href="${escapeHtml(t.link)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHtml(t.name)} in a new tab">Open ${OPEN_ICON}</a>`
+      : `<span class="card-action disabled">Email based ${ICONS.mail.replace('width="22" height="22"','width="15" height="15" class="btn-icon"')}</span>`;
+
+    const copyBtn = hasLink
+      ? `<button type="button" class="copy-btn" data-link="${escapeHtml(t.link)}" aria-label="Copy link for ${escapeHtml(t.name)}">
+           ${COPY_ICON}<span class="tip">Copied!</span>
+         </button>`
+      : "";
+
+    const card = document.createElement("article");
+    card.className = "card";
+    card.style.animationDelay = Math.min(index * 40, 320) + "ms";
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="tool-icon" aria-hidden="true">${toolIcon}</span>
+        <h3>${highlight(t.name, q)}</h3>
+      </div>
+      <p>${highlight(t.desc, q)}</p>
+      <div class="card-actions">
+        ${action}
+        ${copyBtn}
+      </div>
+    `;
+    return card;
+  }
+
+  function buildSection(cat, tools, q) {
+    const isCollapsed = collapsed.has(cat);
+    const section = document.createElement("section");
+    section.className = "cat-section";
+
+    const bodyId = "cat-body-" + cat.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+    const header = document.createElement("button");
+    header.type = "button";
+    header.className = "cat-header";
+    header.setAttribute("aria-expanded", String(!isCollapsed));
+    header.setAttribute("aria-controls", bodyId);
+    header.innerHTML = `
+      <svg class="chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      <span class="cat-icon" aria-hidden="true">${CATEGORY_ICONS[cat] || ICONS.wiki}</span>
+      <span class="cat-title">${escapeHtml(cat)}</span>
+      <span class="cat-count">${tools.length}</span>
+    `;
+
+    const body = document.createElement("div");
+    body.className = "cat-body";
+    body.id = bodyId;
+
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    tools.forEach((t, i) => grid.appendChild(buildCard(t, q, i)));
+    body.appendChild(grid);
+
+    // collapse handling
+    function applyCollapse(animate) {
+      if (collapsed.has(cat)) {
+        if (animate) { body.style.maxHeight = body.scrollHeight + "px"; requestAnimationFrame(() => body.style.maxHeight = "0px"); }
+        else body.style.maxHeight = "0px";
+      } else {
+        body.style.maxHeight = animate ? body.scrollHeight + "px" : "none";
+        if (animate) body.addEventListener("transitionend", () => { if (!collapsed.has(cat)) body.style.maxHeight = "none"; }, { once: true });
+      }
+    }
+    applyCollapse(false);
+
+    header.addEventListener("click", () => {
+      if (collapsed.has(cat)) collapsed.delete(cat); else collapsed.add(cat);
+      header.setAttribute("aria-expanded", String(!collapsed.has(cat)));
+      // set explicit height before animating
+      body.style.maxHeight = body.scrollHeight + "px";
+      requestAnimationFrame(() => applyCollapse(true));
+    });
+
+    section.appendChild(header);
+    section.appendChild(body);
+    return section;
+  }
+
+  /* ---------- main render ---------- */
+  function render() {
+    const q = searchInput.value.trim().toLowerCase();
+    sectionsEl.innerHTML = "";
+
+    let shownTotal = 0;
+    CATEGORY_ORDER.forEach(cat => {
+      if (activeCategory !== "All" && activeCategory !== cat) return;
+      const matches = TOOLS.filter(t => t.category === cat && toolMatches(t, q));
+      if (matches.length === 0) return;
+      shownTotal += matches.length;
+      sectionsEl.appendChild(buildSection(cat, matches, q));
+    });
+
+    const total = TOOLS.length;
+    resultCount.textContent = `Showing ${shownTotal} of ${total} tools`;
+    noResults.classList.toggle("show", shownTotal === 0);
+    sectionsEl.style.display = shownTotal === 0 ? "none" : "";
+  }
+
+  /* ---------- copy-to-clipboard (event delegation) ---------- */
+  sectionsEl.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".copy-btn");
+    if (!btn) return;
+    const link = btn.getAttribute("data-link");
+    const tip = btn.querySelector(".tip");
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = link; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta);
+      }
+      btn.classList.add("copied");
+      btn.innerHTML = CHECK_ICON + '<span class="tip">Copied!</span>';
+      setTimeout(() => {
+        btn.classList.remove("copied");
+        btn.innerHTML = COPY_ICON + '<span class="tip">Copied!</span>';
+      }, 1400);
+    } catch (err) {
+      if (tip) { tip.textContent = "Press Ctrl+C"; btn.classList.add("copied"); }
+    }
+  });
+
+  /* ---------- search + shortcuts ---------- */
+  searchInput.addEventListener("input", render);
+
+  clearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    activeCategory = "All";
+    document.querySelectorAll(".filter-btn").forEach(b => {
+      const isAll = b.textContent === "All";
+      b.classList.toggle("active", isAll);
+      b.setAttribute("aria-pressed", String(isAll));
+    });
+    render();
+    searchInput.focus();
+  });
+
+  // "/" focuses search, Esc clears it
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+    } else if (e.key === "Escape" && document.activeElement === searchInput) {
+      searchInput.value = "";
+      render();
+    }
+  });
+
+  render();
+</script>
+</body>
+</html>
