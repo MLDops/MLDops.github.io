@@ -548,7 +548,7 @@
     { name: "TT (Trouble Ticket)", icon: "ticket", link: "https://tt.amazon.com/", desc: "Raise issue-related tickets.", category: "IT & Support", keywords: "tt trouble ticket issue raise sim report" },
     { name: "IT Support", icon: "support", link: "https://it.amazon.com/", desc: "IT support for any hardware or software complaints or queries.", category: "IT & Support", keywords: "it support hardware software help laptop complaint query" },
     { name: "ETS Login", icon: "transport", link: "https://amz3.moveinsync.com/optin/", desc: "Transport opt in or out.", category: "Transport", keywords: "ets moveinsync transport cab shuttle optin opt in out commute" },
-    { name: "Opting Cab Service", icon: "mail", link: "", desc: "Send an email to opt in to the cab service.", category: "Transport", keywords: "cab taxi transport opt in email service commute" },
+    { name: "Opting Cab Service", icon: "mail", link: "Activate Cab Services.msg", desc: "Opens a ready-to-send Outlook email (with the geocode guide attached) to opt in to the cab service.", category: "Transport", keywords: "cab taxi transport opt in email service commute activate msg outlook" },
     { name: "AllDigi", icon: "pay", link: "https://smartpay.buzzily.com/AmazonSSO/Common/Home.aspx", desc: "View monthly payslips, reimbursements, resignation and more.", category: "Pay & HR", keywords: "alldigi payslip salary reimbursement resignation hr smartpay payroll" },
     { name: "Password Change", icon: "lock", link: "https://password-v2.corp.amazon.com/", desc: "If you have forgotten or want to change your Amazon password.", category: "Security & Access", keywords: "password change reset forgot credentials login" },
     { name: "Midway Portal", icon: "key", link: "https://midway-auth.amazon.com/", desc: "Password management for your security key.", category: "Security & Access", keywords: "midway auth security key pin yubikey authentication mfa" },
@@ -647,14 +647,22 @@
   /* ---------- card + section builders ---------- */
   function buildCard(t, q, index) {
     const hasLink = t.link && t.link.length > 0;
+    const isMailto = hasLink && /^mailto:/i.test(t.link);
+    const isMsg = hasLink && /\.msg$/i.test(t.link);
     const toolIcon = ICONS[t.icon] || ICONS.wiki;
 
-    const action = hasLink
-      ? `<a class="card-action" href="${escapeHtml(t.link)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHtml(t.name)} in a new tab">Open ${OPEN_ICON}</a>`
-      : `<span class="card-action disabled">Email based ${ICONS.mail.replace('width="22" height="22"','width="15" height="15" class="btn-icon"')}</span>`;
+    const mailIcon = ICONS.mail.replace('width="22" height="22"','width="15" height="15" class="btn-icon"');
+    const action = !hasLink
+      ? `<span class="card-action disabled">Email based ${mailIcon}</span>`
+      : isMsg
+        ? `<a class="card-action" href="${escapeHtml(t.link)}" download aria-label="Open ${escapeHtml(t.name)} email in Outlook">Open in Outlook ${mailIcon}</a>`
+        : isMailto
+          ? `<a class="card-action" href="${escapeHtml(t.link)}" aria-label="Email ${escapeHtml(t.name)}">Email ${mailIcon}</a>`
+          : `<a class="card-action" href="${escapeHtml(t.link)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHtml(t.name)} in a new tab">Open ${OPEN_ICON}</a>`;
 
-    const copyBtn = hasLink
-      ? `<button type="button" class="copy-btn" data-link="${escapeHtml(t.link)}" aria-label="Copy link for ${escapeHtml(t.name)}">
+    // Copy button only makes sense for shareable URLs / email addresses, not local files
+    const copyBtn = (hasLink && !isMsg)
+      ? `<button type="button" class="copy-btn" data-link="${escapeHtml(t.link)}" aria-label="Copy ${isMailto ? 'email address' : 'link'} for ${escapeHtml(t.name)}">
            ${COPY_ICON}<span class="tip">Copied!</span>
          </button>`
       : "";
@@ -752,7 +760,8 @@
   sectionsEl.addEventListener("click", async (e) => {
     const btn = e.target.closest(".copy-btn");
     if (!btn) return;
-    const link = btn.getAttribute("data-link");
+    const raw = btn.getAttribute("data-link");
+    const link = /^mailto:/i.test(raw) ? raw.replace(/^mailto:/i, "") : raw;
     const tip = btn.querySelector(".tip");
     try {
       if (navigator.clipboard && window.isSecureContext) {
