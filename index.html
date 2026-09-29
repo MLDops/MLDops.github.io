@@ -22,6 +22,7 @@
     --radius: 8px;
     --shadow: 0 1px 4px rgba(0,28,36,.12), 0 4px 12px rgba(0,28,36,.06);
     --font: "Amazon Ember","Helvetica Neue",Arial,sans-serif;
+    --page-max: 1600px;         /* overall content width; fills wide screens */
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -82,7 +83,7 @@
     padding: 40px 24px 48px;
     border-bottom: 4px solid var(--aws-orange);
   }
-  .hero-inner { max-width: 1200px; margin: 0 auto; }
+  .hero-inner { max-width: var(--page-max); margin: 0 auto; }
   .hero h1 { font-size: 30px; font-weight: 700; margin-bottom: 8px; }
   .hero p { color: #cfd7df; font-size: 15px; max-width: 720px; }
   .hero .badge {
@@ -99,7 +100,7 @@
   }
 
   /* ===== Layout ===== */
-  .container { max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px; }
+  .container { max-width: var(--page-max); margin: 0 auto; padding: 28px 24px 60px; }
 
   /* ===== Sticky search + controls ===== */
   .controls-wrap {
@@ -548,7 +549,7 @@
     { name: "TT (Trouble Ticket)", icon: "ticket", link: "https://tt.amazon.com/", desc: "Raise issue-related tickets.", category: "IT & Support", keywords: "tt trouble ticket issue raise sim report" },
     { name: "IT Support", icon: "support", link: "https://it.amazon.com/", desc: "IT support for any hardware or software complaints or queries.", category: "IT & Support", keywords: "it support hardware software help laptop complaint query" },
     { name: "ETS Login", icon: "transport", link: "https://amz3.moveinsync.com/optin/", desc: "Transport opt in or out.", category: "Transport", keywords: "ets moveinsync transport cab shuttle optin opt in out commute" },
-    { name: "Opting Cab Service", icon: "mail", link: "Activate Cab Services.msg", desc: "Opens a ready-to-send Outlook email (with the geocode guide attached) to opt in to the cab service.", category: "Transport", keywords: "cab taxi transport opt in email service commute activate msg outlook" },
+    { name: "Opting Cab Service", icon: "mail", link: "Activate Cab Services.oft", desc: "Opens a ready-to-send Outlook email (with the geocode guide attached) to opt in to the cab service.", category: "Transport", keywords: "cab taxi transport opt in email service commute activate oft outlook template" },
     { name: "AllDigi", icon: "pay", link: "https://smartpay.buzzily.com/AmazonSSO/Common/Home.aspx", desc: "View monthly payslips, reimbursements, resignation and more.", category: "Pay & HR", keywords: "alldigi payslip salary reimbursement resignation hr smartpay payroll" },
     { name: "Password Change", icon: "lock", link: "https://password-v2.corp.amazon.com/", desc: "If you have forgotten or want to change your Amazon password.", category: "Security & Access", keywords: "password change reset forgot credentials login" },
     { name: "Midway Portal", icon: "key", link: "https://midway-auth.amazon.com/", desc: "Password management for your security key.", category: "Security & Access", keywords: "midway auth security key pin yubikey authentication mfa" },
@@ -648,7 +649,7 @@
   function buildCard(t, q, index) {
     const hasLink = t.link && t.link.length > 0;
     const isMailto = hasLink && /^mailto:/i.test(t.link);
-    const isMsg = hasLink && /\.msg$/i.test(t.link);
+    const isMsg = hasLink && /\.(msg|oft)$/i.test(t.link);
     const toolIcon = ICONS[t.icon] || ICONS.wiki;
 
     const mailIcon = ICONS.mail.replace('width="22" height="22"','width="15" height="15" class="btn-icon"');
